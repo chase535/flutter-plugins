@@ -150,12 +150,12 @@ class WebviewImpl extends Webview {
   }
 
   @override
-  void addScriptToExecuteOnDocumentCreated(String javaScript) {
+  Future<void> addScriptToExecuteOnDocumentCreated(String javaScript) async {
     if (!(Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
       return;
     }
     assert(javaScript.trim().isNotEmpty);
-    channel.invokeMethod("addScriptToExecuteOnDocumentCreated", {
+    await channel.invokeMethod("addScriptToExecuteOnDocumentCreated", {
       "viewId": viewId,
       "javaScript": javaScript,
     });
@@ -259,11 +259,11 @@ class WebviewImpl extends Webview {
   }
 
   @override
-  void close() {
+  Future<void> close() async {
     if (_closed) {
       return;
     }
-    channel.invokeMethod("close", {"viewId": viewId});
+    await channel.invokeMethod("close", {"viewId": viewId});
   }
 
   @override
