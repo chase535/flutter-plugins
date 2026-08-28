@@ -45,7 +45,7 @@ abstract class Webview {
   /// available only: macOS (Brightness.dark only 10.14+)
   void setBrightness(Brightness? brightness);
 
-  void addScriptToExecuteOnDocumentCreated(String javaScript);
+  Future<void> addScriptToExecuteOnDocumentCreated(String javaScript);
 
   /// Append a string to the webview's user-agent.
   Future<void> setApplicationNameForUserAgent(String applicationName);
@@ -91,7 +91,7 @@ abstract class Webview {
   void removeAllWebMessageReceivedCallback();
 
   /// Close the web view window.
-  void close();
+  Future<void> close();
 
   /// evaluate JavaScript in the web view.
   Future<String?> evaluateJavaScript(String javaScript);
