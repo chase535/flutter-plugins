@@ -15,6 +15,7 @@ import 'src/message_channel.dart';
 import 'src/webview.dart';
 import 'src/webview_impl.dart';
 
+export 'src/cookie.dart';
 export 'src/create_configuration.dart';
 export 'src/title_bar.dart';
 export 'src/webview.dart';
