@@ -17,6 +17,23 @@ typedef OnUrlRequestCallback = bool Function(String url);
 /// [message] constains the webmessage
 typedef OnWebMessageReceivedCallback = void Function(String message);
 
+String _normalizeCookieDomain(String domain) {
+  var normalized = domain.trim().toLowerCase();
+  while (normalized.startsWith('.')) {
+    normalized = normalized.substring(1);
+  }
+  return normalized;
+}
+
+bool _cookieDomainMatches(String cookieDomain, String allowedDomain) {
+  final cookie = _normalizeCookieDomain(cookieDomain);
+  final allowed = _normalizeCookieDomain(allowedDomain);
+  if (cookie.isEmpty || allowed.isEmpty) {
+    return false;
+  }
+  return cookie == allowed || cookie.endsWith('.$allowed');
+}
+
 abstract class Webview {
   Future<void> get onClose;
 
@@ -102,5 +119,33 @@ abstract class Webview {
   /// post a web message as JSON to the top level document in this WebView
   Future<void> postWebMessageAsJson(String webMessage);
 
+  /// Returns every cookie currently stored by this WebView profile.
   Future<List<WebviewCookie>> getAllCookies();
+
+  /// Returns only cookies whose domain is [allowedDomains] or one of its
+  /// subdomains.
+  ///
+  /// This is intended for authentication hand-off flows where exporting the
+  /// entire browser profile would expose unrelated sessions. Leading dots in
+  /// cookie domains are ignored and matching is case-insensitive.
+  Future<List<WebviewCookie>> getCookiesForDomains(
+    Iterable<String> allowedDomains,
+  ) async {
+    final domains = allowedDomains
+        .map(_normalizeCookieDomain)
+        .where((domain) => domain.isNotEmpty)
+        .toSet();
+    if (domains.isEmpty) {
+      return const <WebviewCookie>[];
+    }
+
+    final cookies = await getAllCookies();
+    return cookies
+        .where(
+          (cookie) => domains.any(
+            (domain) => _cookieDomainMatches(cookie.domain, domain),
+          ),
+        )
+        .toList(growable: false);
+  }
 }
